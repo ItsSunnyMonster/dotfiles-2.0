@@ -1,0 +1,82 @@
+#Alacritty:
+
+env:
+  TERM: alacritty
+
+window:
+  opacity: 0.6
+  padding:
+    x: 25
+    y: 25
+
+    dynamic_padding: true
+    decoration: none
+
+font:
+  normal:
+    family: JetBrains Mono Nerd Font
+
+  bold:
+    family: JetBrains Mono Nerd Font
+
+  italic:
+    family: JetBrains Mono Nerd Font
+
+  bold_italic:
+    family: JetBrains Mono Nerd Font
+
+  size: 15
+
+colors:
+  # Default colors
+  primary:
+    background: "0x1d2230"
+    foreground: "0xe3e4e0"
+
+  # Colors the cursor will use if `custom_cursor_colors` is true
+  cursor:
+    text: "0x1d2230"
+    cursor: "0xe3e4e0"
+
+  # Normal colors
+  normal:
+    black: "0x1d2230"
+    red: "0xfe1f56"
+    green: "0x78db88"
+    yellow: "0xfde063"
+    blue: "0x24e0fe"
+    magenta: "0xd5a3e7"
+    cyan: "0x48ccbe"
+    white: "0xe3e4e0"
+
+  # Bright colors
+  bright:
+    black: "0x5c6069"
+    red: "0xfd2b72"
+    green: "0x93fd92"
+    yellow: "0xfefe6a"
+    blue: "0x73fefb"
+    magenta: "0xecbaf8"
+    cyan: "0x5cfae3"
+    white: "0xfdfdfd"
+
+  indexed_colors:
+    - { index: 16, color: "0xf78c6c" }
+    - { index: 17, color: "0xff5370" }
+    - { index: 18, color: "0x303030" }
+    - { index: 19, color: "0x353535" }
+    - { index: 20, color: "0xb2ccd6" }
+    - { index: 21, color: "0xeeffff" }
+
+cursor:
+  style: Underline
+  unfocused_hollow: false
+
+live_config_reload: true
+
+key_bindings:
+  - { key: Key0, mods: Control, action: ResetFontSize }
+
+  - { key: Equals, mods: Control, action: IncreaseFontSize }
+
+  - { key: Minus, mods: Control, action: DecreaseFontSize }
