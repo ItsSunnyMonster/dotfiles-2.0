@@ -1,8 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env fish
+. ./latlong.fish
 picom --experimental-backend &
 nitrogen --restore &
-xsetroot -cursor_name left_ptr &
-xrdb -merge ~/.Xresources &
 /usr/bin/pipewire &
 /usr/bin/pipewire-pulse &
 /usr/bin/pipewire-media-session &
@@ -18,5 +17,6 @@ xinput --set-prop 'pointer:''ELAN2203:00 04F3:309A Touchpad' 'libinput Natural S
 flameshot &
 dunst &
 fcitx &
-redshift-gtk -l $LATLONG -t 6500:3600 &
+redshift-gtk -l $latlong -t 6500:3600 &
 setxkbmap -option compose:ralt &
+lxsession &

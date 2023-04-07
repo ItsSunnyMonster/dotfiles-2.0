@@ -16,7 +16,7 @@ from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 from qtile_extras import widget
-from qtile_extras.widget.decorations import BorderDecoration
+from qtile_extras.widget.decorations import BorderDecoration, RectDecoration, PowerLineDecoration
 
 import os
 import subprocess
@@ -61,15 +61,15 @@ keys = [
 ]
 
 groups = [
-        Group("term"),
-        Group("dev"),
-        Group("www"),
-        Group("msg"),
-        Group("file"),
-        Group("game"),
-        Group("doc"),
-        Group("rec"),
-        Group("media"),
+        Group(""),
+        Group("󰲋"),
+        Group("󰌀"),
+        Group("󰙯"),
+        Group("󰉋"),
+        Group("󰍳"),
+        Group("󰈙"),
+        Group(""),
+        Group(""),
 ]
 
 for i in range(len(groups)):
@@ -149,81 +149,67 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.Sep(
-                    linewidth=0,
-                    background="#292c35",
-                    padding=13
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background="#525769",
-                    padding=13
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background="#7b839e",
-                    padding=13
-                ),
+                widget.Spacer(length=10),
                 widget.TextBox(
                     text="", 
-                    fontsize=21, 
-                    padding=10, 
-                    #font="mononoki Nerd Font Mono", 
+                    fontsize=30, 
+                    padding=20, 
+                    font="mononoki Nerd Font Mono", 
                     foreground="#090c0c",
                     background="#a3aed2", 
-                    mouse_callbacks={"Button1": lazy.spawn("rofi -show drun -show-icons")}
+                    mouse_callbacks={"Button1": lazy.spawn("rofi -show drun -show-icons")},
+                    decorations=[
+                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
+                    ],
                 ),
                 widget.TextBox(
-                    text="",
-                    fontsize=33,
-                    foreground="#a3aed2",
-                    background="#769ff0",
-                    padding=-1
-                ),
-                widget.TextBox(
-                    text="",
-                    fontsize=33,
-                    foreground="#769ff0",
-                    background="#394260",
-                    padding=-1
-                ), 
-                widget.TextBox(
-                    text="",
-                    fontsize=33,
-                    foreground="#394260",
-                    background="#212736",
-                    padding=-1
-                ), 
-                widget.TextBox(
-                    text="",
-                    fontsize=33,
-                    foreground="#212736",
-                    background="#1d2230",
-                    padding=-1
+                    text=" |",
+                    fontsize=20,
+                    foreground=colors["black_bright"],
+                    background=colors["black_semibright"]
                 ),
                 widget.GroupBox(
                     active=colors["green"], inactive=colors["white"], urgent_text=colors["red_bright"], 
                     highlight_method="line", 
-                    rounded=False, 
-                    padding_x=4, 
+                    rounded=True, 
+                    padding_x=5, 
                     margin_x=2, margin_y=4, 
                     urgent_alert_method="text",
-                    this_current_screen_border=colors["green"],
-                    this_screen_border=colors["blue"],
+                    this_current_screen_border=colors["white"],
                     other_current_screen_border=colors["green"],
-                    other_screen_border=colors["blue"],
                     disable_drag=True,
-                    fontsize=15,
+                    fontsize=30,
+                    borderwidth=2,
                     background=colors["black_semibright"],
                     highlight_color="#111725",
-                    font="mononoki Nerd Font"
+                    font="mononoki Nerd Font Mono"
                 ),
                 widget.TextBox(
-                    text="",
-                    fontsize=34,
-                    foreground=colors["black_semibright"],
-                    padding=-1
+                    text="|",
+                    fontsize=20,
+                    foreground=colors["black_bright"],
+                    background=colors["black_semibright"]
                 ),
+                widget.Backlight(
+                    backlight_name="amdgpu_bl0",
+                    change_command="brightnessctl set {0}%",
+                    foreground=colors["black_semibright"],
+                    background=colors["red_bright"],
+                    fmt="  {}",
+                    decorations=[
+                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
+                    ],
+                ),
+                widget.PulseVolume(
+                    fmt="墳  {}",
+                    foreground=colors["black_semibright"],
+                    background=colors["cyan_bright"],
+                    update_interval=0.1,
+                    decorations=[
+                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
+                    ],
+                ),
+                widget.Spacer(),
                 widget.WindowName(font="JetBrains Mono Nerd Font"),
                 #widget.Chord(
                 #    chords_colors={
@@ -255,36 +241,6 @@ screens = [
                 #     background=colors["black_semibright"],
                 #     padding=10
                 # ),
-                widget.Backlight(
-                    backlight_name="amdgpu_bl0",
-                    change_command="brightnessctl set {0}%",
-                    background=colors["black_semibright"],
-                    foreground=colors["red_bright"],
-                    fmt="  {}",
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["red_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
-                ),
-                widget.PulseVolume(
-                    fmt="墳  {}",
-                    background=colors["black_semibright"],
-                    foreground=colors["cyan_bright"],
-                    update_interval=0.1,
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["cyan_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
                 widget.Sep(
                     linewidth=0,
                     background=colors["black_semibright"],
@@ -440,11 +396,11 @@ screens = [
                     padding=13
                 ),
             ],
-            35,
-            background=colors["black"],
-            margin=[10,10,0,10]
-            #border_width=[2, 0, 2, 0],  # Draw top and bottom borders
-            #border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
+            30,
+            background=colors["black_semibright"],
+            margin=[10,10,0,10],
+            border_width=7,  # Draw top and bottom borders
+            border_color=colors["black_semibright"]  # Borders are magenta
         ),
     ),
 ]
@@ -502,8 +458,9 @@ wmname = "LG3D"
 ### Autostart
 @hook.subscribe.startup_once
 def autostart_once():
-    home = os.path.expanduser('~/.config/qtile/autostart_once.sh')
-    subprocess.run([home])
+    command = os.path.expanduser('~/.config/qtile/autostart_once.fish')
+    cwd = os.path.expanduser('~/.config/qtile/')
+    subprocess.run([command], cwd=cwd)
 
 
 @hook.subscribe.client_focus
