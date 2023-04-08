@@ -11,6 +11,7 @@
 #    \|_________|              
 
 from libqtile import bar, layout, widget, hook
+from libqtile.bar import CALCULATED
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
@@ -23,6 +24,12 @@ import subprocess
 
 mod = "mod4"
 terminal = guess_terminal()
+
+def spawn_launcher(_):
+    subprocess.run(os.path.expanduser("~/.config/rofi/bin/launcher"))
+    
+def spawn_powermenu(_):
+    subprocess.run(os.path.expanduser("~/.config/rofi/bin/powermenu"))
 
 keys = [
     Key([mod], "h", lazy.layout.left()),
@@ -47,10 +54,10 @@ keys = [
     Key([mod, "shift"], "c", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawn("rofi -show drun -show-icons"), desc="Spawn an application using rofi"),
-    Key([mod, "shift"], "r", lazy.spawn("rofi -show run"), desc="Spawn a command using rofi"),
+    Key([mod], "r", lazy.function(spawn_launcher), desc="Spawn an application using rofi"),
+    Key([mod, "shift"], "r", lazy.spawn("~/.config/rofi/bin/launcher"), desc="Spawn a command using rofi"),
     Key([mod], "Tab", lazy.spawn("rofi -show window -show-icons"), desc="Window menu with rofi"),
-    Key([mod], "x", lazy.spawn("rofi -show power-menu -modi power-menu:~/.config/rofi/rofi-power-menu"), desc="Power menu with rofi"),
+    Key([mod], "x", lazy.function(spawn_powermenu), desc="Power menu with rofi"),
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating"),
     Key([mod, "shift"], "s", lazy.spawn("flameshot gui"), desc="Flameshot"),
     Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +10%"), desc="Increase the brightness"),
@@ -58,6 +65,7 @@ keys = [
     Key([mod, "shift"], "k", lazy.spawn("dunstctl history-pop"), desc="Pop the last notification"),
     Key([mod, "shift"], "j", lazy.spawn("dunstctl close"), desc="Close the last notification"),
     Key([mod, "shift"], "d", lazy.spawn("dunstctl close-all"), desc="Close all notifications"),
+    Key([mod, "shift"], "t", lazy.hide_show_bar(), desc="Toggle the top bar"),
 ]
 
 groups = [
@@ -69,7 +77,7 @@ groups = [
         Group("󰍳"),
         Group("󰈙"),
         Group(""),
-        Group(""),
+        Group(""),
 ]
 
 for i in range(len(groups)):
@@ -96,42 +104,39 @@ for i in range(len(groups)):
         ]
     )
 
-colors = {
-        "black":            "#000000",
-        "black_bright":     "#5c6069",
-        "black_semibright": "#1d2230",
-        "red":              "#fe1f56",
-        "red_bright":       "#fd2b72",
-        "green":            "#78db88",
-        "green_bright":     "#93fd92",
-        "yellow":           "#fde063",
-        "yellow_bright":    "#fefe6a",
-        "blue":             "#24e0fe",
-        "blue_bright":      "#73fefb",
-        "magenta":          "#d5a3e7",
-        "magenta_bright":   "#ecbaf8",
-        "cyan":             "#48ccbe",
-        "cyan_bright":      "#5cfae3",
-        "white":            "#e3e4e0",
-        "white_bright":     "#fdfdfd"
+colours = {
+    "rosewater":    "#f5e0dc",
+    "flamingo":     "#f2cdcd",
+    "pink":         "#f5c2c7",
+    "mauve":        "#cba6f7",
+    "red":          "#f38ba8",
+    "maroon":       "#eba0ac",
+    "peach":        "#fab387",
+    "yellow":       "#f9e2af",
+    "green":        "#a6e3a1",
+    "teal":         "#94e2d5",
+    "sky":          "#89dceb",
+    "sapphire":     "#74c7ec",
+    "blue":         "#89b4fa",
+    "lavender":     "#b4befe",
+    "text":         "#cdd6f4",
+    "subtext1":     "#bac2de",
+    "subtext0":     "#a6adc8",
+    "overlay2":     "#9399b2",
+    "overlay1":     "#7f849c",
+    "overlay0":     "#6c7086",
+    "surface2":     "#585b70",
+    "surface1":     "#45475a",
+    "surface0":     "#313244",
+    "base":         "#1e1e2e",
+    "mantle":       "#181825",
+    "crust":        "#11111b"
 }
 
 layouts = [
-    layout.MonadTall(margin=10, border_focus=colors["green_bright"], border_normal=colors["black"], border_width=3),
-    #layout.Columns(border_focus_stack=["#d75f5f", "#8f3d3d"], border_width=4),
+    layout.MonadTall(margin=10, border_focus=colours["sapphire"], border_normal=colours["base"], border_width=3, new_client_position="top"),
     layout.Max(margin=10),
-    layout.Floating(border_focus=colors["blue_bright"], border_width=3),
-    # Try more layouts by unleashing below layouts.
-    # layout.Stack(num_stacks=2),
-    # layout.Bsp(),
-    # layout.Matrix(),
-    # layout.MonadTall(),
-    # layout.MonadWide(),
-    # layout.RatioTile(),
-    # layout.Tile(),
-    # layout.TreeTab(),
-    # layout.VerticalTile(),
-    # layout.Zoomy(),
+    layout.Floating(border_focus=colours["yellow"], border_width=3),
 ]
 
 widget_defaults = dict(
@@ -141,10 +146,82 @@ widget_defaults = dict(
 )
 extension_defaults = widget_defaults.copy()
 
-def open_wifi_menu():
-    home = os.path.expanduser('~/.config/rofi/rofi-wifi-menu.sh')
-    subprocess.run([home])
+def separator():
+    return widget.TextBox(
+        text="|",
+        fontsize=20,
+        foreground=colours["overlay0"],
+    )
+    
+class ColouredGroupBox(widget.GroupBox):
+    def draw(self):
+        self.drawer.clear(self.background or self.bar.background)
 
+        offset = self.margin_x
+        for i, g in enumerate(self.groups):
+            to_highlight = False
+            is_block = self.highlight_method == "block"
+            is_line = self.highlight_method == "line"
+
+            bw = self.box_width([g])
+
+            if self.group_has_urgent(g) and self.urgent_alert_method == "text":
+                text_color = self.urgent_text
+            else:
+                text_color = self.colours[i]
+
+            if g.screen:
+                if self.highlight_method == "text":
+                    border = None
+                    text_color = self.this_current_screen_border
+                else:
+                    if self.block_highlight_text_color:
+                        text_color = self.block_highlight_text_color
+                    if self.bar.screen.group.name == g.name:
+                        if self.qtile.current_screen == self.bar.screen:
+                            border = self.colours[i]
+                            to_highlight = True
+                        else:
+                            border = self.this_screen_border
+                    else:
+                        if self.qtile.current_screen == g.screen:
+                            border = self.other_current_screen_border
+                        else:
+                            border = self.other_screen_border
+            elif self.group_has_urgent(g) and self.urgent_alert_method in (
+                "border",
+                "block",
+                "line",
+            ):
+                border = self.urgent_border
+                if self.urgent_alert_method == "block":
+                    is_block = True
+                elif self.urgent_alert_method == "line":
+                    is_line = True
+            else:
+                border = None
+
+            self.drawbox(
+                offset,
+                g.label,
+                border,
+                text_color,
+                highlight_color=self.highlight_color,
+                width=bw,
+                rounded=self.rounded,
+                block=is_block,
+                line=is_line,
+                highlighted=to_highlight,
+            )
+            offset += bw + self.spacing
+        self.drawer.draw(offsetx=self.offset, offsety=self.offsety, width=self.width)
+        
+def box_decoration():
+    return RectDecoration(radius=14, use_widget_background=True, filled=True, group=True)
+    
+def powerline_decoration():
+    return PowerLineDecoration(path="arrow_right")
+        
 screens = [
     Screen(
         top=bar.Bar(
@@ -155,74 +232,69 @@ screens = [
                     fontsize=30, 
                     padding=20, 
                     font="mononoki Nerd Font Mono", 
-                    foreground="#090c0c",
-                    background="#a3aed2", 
-                    mouse_callbacks={"Button1": lazy.spawn("rofi -show drun -show-icons")},
-                    decorations=[
-                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
+                    foreground=colours["base"],
+                    background=colours["blue"], 
+                    mouse_callbacks={"Button1": lazy.function(spawn_launcher)},
+                    decorations=[box_decoration()]
+                ),
+                widget.Spacer(length=10),
+                separator(),
+                ColouredGroupBox(
+                    urgent_border=colours["red"], 
+                    colours=[
+                        colours["lavender"], colours["peach"], colours["blue"], 
+                        colours["mauve"], colours["yellow"], colours["green"],
+                        colours["sapphire"], colours["red"], colours["sky"]
                     ],
-                ),
-                widget.TextBox(
-                    text=" |",
-                    fontsize=20,
-                    foreground=colors["black_bright"],
-                    background=colors["black_semibright"]
-                ),
-                widget.GroupBox(
-                    active=colors["green"], inactive=colors["white"], urgent_text=colors["red_bright"], 
                     highlight_method="line", 
                     rounded=True, 
                     padding_x=5, 
                     margin_x=2, margin_y=4, 
-                    urgent_alert_method="text",
-                    this_current_screen_border=colors["white"],
-                    other_current_screen_border=colors["green"],
+                    urgent_alert_method="line",
+                    this_current_screen_border=colours["text"],
+                    other_current_screen_border=colours["rosewater"],
                     disable_drag=True,
                     fontsize=30,
                     borderwidth=2,
-                    background=colors["black_semibright"],
-                    highlight_color="#111725",
+                    highlight_color=colours["crust"],
                     font="mononoki Nerd Font Mono"
                 ),
-                widget.TextBox(
-                    text="|",
-                    fontsize=20,
-                    foreground=colors["black_bright"],
-                    background=colors["black_semibright"]
-                ),
+                separator(),
+                widget.Spacer(length=10),
                 widget.Backlight(
                     backlight_name="amdgpu_bl0",
                     change_command="brightnessctl set {0}%",
-                    foreground=colors["black_semibright"],
-                    background=colors["red_bright"],
+                    foreground=colours["base"],
+                    background=colours["rosewater"],
                     fmt="  {}",
-                    decorations=[
-                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
-                    ],
+                    padding=10,
+                    decorations=[box_decoration(), powerline_decoration()]
                 ),
                 widget.PulseVolume(
                     fmt="墳  {}",
-                    foreground=colors["black_semibright"],
-                    background=colors["cyan_bright"],
+                    foreground=colours["base"],
+                    background=colours["pink"],
                     update_interval=0.1,
-                    decorations=[
-                        RectDecoration(radius=10, use_widget_background=True, filled=True, group=True)
-                    ],
+                    padding=10,
+                    decorations=[box_decoration(), powerline_decoration()]
+                ),
+                widget.Battery(
+                    charge_char="", 
+                    discharge_char="", 
+                    empty_char="",
+                    full_char="", 
+                    fontsize=17,
+                    foreground=colours["base"],
+                    format="{char} {percent:2.0%}",
+                    background=colours["red"],
+                    update_interval=1,
+                    show_short_text=False,
+                    padding=10,
+                    decorations = [box_decoration()],
                 ),
                 widget.Spacer(),
-                widget.WindowName(font="JetBrains Mono Nerd Font"),
-                #widget.Chord(
-                #    chords_colors={
-                #        "launch": ("#ff0000", "#ffffff"),
-                #    },
-                #    name_transform=lambda name: name.upper(),
-                #),
-                widget.TextBox(
-                    text="",
-                    fontsize=34,
-                    foreground=colors["black_semibright"],
-                    padding=-1
-                ),
+                widget.WindowName(font="JetBrains Mono Nerd Font", width=480, scroll=True, scroll_interval=0.02, scroll_step=1),
+                widget.Spacer(),
                 # widget.Bluetooth(
                 #     hci="/dev_04_52_C7_83_60_BD",
                 #     fmt=" {}",
@@ -236,171 +308,53 @@ screens = [
                 #     ],
                 #     mouse_callbacks={"Button1": lazy.spawn("alacritty -e bluetoothctl")},
                 # ),
-                # widget.Sep(
-                #     linewidth=0,
-                #     background=colors["black_semibright"],
-                #     padding=10
-                # ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
-                ),
-                widget.Net(
-                    background=colors["black_semibright"],
-                    foreground=colors["green_bright"],
-                    interface="wlp1s0",
-                    format = '↓ {down} ↑ {up}',
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["green_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
-                ),
-                widget.Battery(
-                    charge_char="", 
-                    discharge_char="", 
-                    empty_char="",
-                    full_char="", 
-                    fontsize=17,
-                    foreground=colors["yellow_bright"],
-                    format="{char} {percent:2.0%} {hour:d}:{min:02d}",
-                    background=colors["black_semibright"],
-                    update_interval=1,
-                    show_short_text=False,
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["yellow_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
-                ),
                 #widget.CurrentLayoutIcon(scale=0.5,background=colors["black_semibright"], foreground=colors["yellow_bright"]),
                 widget.CurrentLayout(
-                    background=colors["black_semibright"], 
-                    foreground=colors["blue_bright"], 
+                    background=colours["green"], 
+                    foreground=colours["base"], 
                     fmt="𧻓  {}",
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["blue_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
+                    padding=10,
+                    decorations = [box_decoration(), powerline_decoration()],
                 ),
                 widget.CheckUpdates(
                     no_update_string=" No updates", 
                     display_format="  Updates: {updates}",
-                    foreground=colors["green_bright"], 
-                    background=colors["black_semibright"], 
-                    colour_have_updates=colors["green_bright"], 
-                    colour_no_updates=colors["green_bright"],
+                    foreground=colours["base"], 
+                    background=colours["yellow"], 
+                    colour_have_updates=colours["base"], 
+                    colour_no_updates=colours["base"],
                     execute="alacritty -e yay -Syu",
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["green_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=10
+                    padding=10,
+                    decorations = [box_decoration(), powerline_decoration()],
                 ),
                 widget.Clock(
                     format="  %m-%d %I:%M %p", 
-                    background=colors["black_semibright"], 
-                    foreground=colors["red_bright"],
-                    decorations = [
-                        BorderDecoration(
-                            colour=colors["red_bright"],
-                            border_width=[0, 0, 2, 0],
-                        ),
-                    ],
+                    background=colours["teal"], 
+                    foreground=colours["base"],
+                    padding=10,
+                    decorations = [box_decoration()],
                 ),
+                widget.Spacer(length=5),
+                separator(),
+                widget.Systray(background=colours["base"]),
+                separator(),
+                widget.Spacer(length=5),
                 widget.TextBox(
-                    text="|",
-                    fontsize=20,
-                    foreground=colors["black_bright"],
-                    background=colors["black_semibright"]
-                ),
-                widget.Systray(background=colors["black_semibright"]), 
-                widget.Sep(
-                    linewidth=0,
-                    background=colors["black_semibright"],
-                    padding=5
-                ),
-                widget.TextBox(
-                    text="",
-                    fontsize=33,
-                    foreground="#212736",
-                    background="#1d2230",
-                    padding=-1
-                ),
-                widget.TextBox(
-                    text="",
-                    fontsize=34,
-                    foreground="#394260",
-                    background="#212736",
-                    padding=-1
-                ),
-                widget.TextBox(
-                    text="",
-                    fontsize=34,
-                    foreground="#d74747",
-                    background="#394260",
-                    padding=-1
-                ),
-                widget.TextBox(
-                    text=" ",
-                    foreground=colors["white_bright"],
-                    background="#d74747",
-                    padding=5,
-                    fontsize=20, font="mononoki Nerd Font",
-                    mouse_callbacks={"Button1": lazy.spawn("rofi -show power-menu -modi power-menu:~/.config/rofi/rofi-power-menu")}
-                ),        
-                widget.Sep(
-                    linewidth=0,
-                    background="#a3aed2",
-                    padding=13
-                ),             
-                widget.Sep(
-                    linewidth=0,
-                    background="#7b839e",
-                    padding=13
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background="#525769",
-                    padding=13
-                ),
-                widget.Sep(
-                    linewidth=0,
-                    background="#292c35",
-                    padding=13
-                ),
+                    text="",
+                    foreground=colours["base"],
+                    background=colours["red"],
+                    padding=20,
+                    fontsize=30, font="mononoki Nerd Font Mono",
+                    decorations = [box_decoration()],
+                    mouse_callbacks={"Button1": lazy.function(spawn_powermenu)}
+                ),  
+                widget.Spacer(length=10)    
             ],
             30,
-            background=colors["black_semibright"],
+            background=colours["base"],
             margin=[10,10,0,10],
             border_width=7,  # Draw top and bottom borders
-            border_color=colors["black_semibright"]  # Borders are magenta
+            border_color=colours["base"]  # Borders are magenta
         ),
     ),
 ]
@@ -430,8 +384,8 @@ floating_layout = layout.Floating(
         Match(wm_class="pinentry-gtk-2"),
         Match(wm_class="Unity"),
     ],
-    border_focus=colors["blue_bright"],
-    border_normal=colors["black"],
+    border_focus=colours["yellow"],
+    border_normal=colours["base"],
     border_width=3,
 )
 auto_fullscreen = True
@@ -461,9 +415,3 @@ def autostart_once():
     command = os.path.expanduser('~/.config/qtile/autostart_once.fish')
     cwd = os.path.expanduser('~/.config/qtile/')
     subprocess.run([command], cwd=cwd)
-
-
-@hook.subscribe.client_focus
-def handle_client_focus(window):
-    if window.floating:
-        window.cmd_bring_to_front()
