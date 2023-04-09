@@ -10,7 +10,7 @@
 #    |\_________\|__|     \|__|
 #    \|_________|              
 
-from libqtile import bar, layout, widget, hook
+from libqtile import bar, layout, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
@@ -21,7 +21,7 @@ from qtile_extras.widget.decorations import RectDecoration, PowerLineDecoration
 import os
 import subprocess
 
-from ColouredGroupBox import *
+from ColouredGroupBox import ColouredGroupBox
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -154,8 +154,8 @@ def separator():
         fontsize=20,
         foreground=colours["overlay0"],
     )
-    
-        
+
+
 def box_decoration():
     return RectDecoration(radius=14, use_widget_background=True, filled=True, group=True)
     

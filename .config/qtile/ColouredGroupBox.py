@@ -1,5 +1,5 @@
-from libqtile import widget
-from utils import *
+from qtile_extras import widget
+from utils import darken_color
 
 class ColouredGroupBox(widget.GroupBox):
     def draw(self):
