@@ -11,16 +11,17 @@
 #    \|_________|              
 
 from libqtile import bar, layout, widget, hook
-from libqtile.bar import CALCULATED
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
 
 from qtile_extras import widget
-from qtile_extras.widget.decorations import BorderDecoration, RectDecoration, PowerLineDecoration
+from qtile_extras.widget.decorations import RectDecoration, PowerLineDecoration
 
 import os
 import subprocess
+
+from ColouredGroupBox import *
 
 mod = "mod4"
 terminal = guess_terminal()
@@ -135,6 +136,7 @@ colours = {
 
 layouts = [
     layout.MonadTall(margin=10, border_focus=colours["sapphire"], border_normal=colours["base"], border_width=3, new_client_position="top"),
+    layout.MonadWide(margin=10, border_focus=colours["sapphire"], border_normal=colours["base"], border_width=3),
     layout.Max(margin=10),
     layout.Floating(border_focus=colours["yellow"], border_width=3),
 ]
@@ -153,68 +155,6 @@ def separator():
         foreground=colours["overlay0"],
     )
     
-class ColouredGroupBox(widget.GroupBox):
-    def draw(self):
-        self.drawer.clear(self.background or self.bar.background)
-
-        offset = self.margin_x
-        for i, g in enumerate(self.groups):
-            to_highlight = False
-            is_block = self.highlight_method == "block"
-            is_line = self.highlight_method == "line"
-
-            bw = self.box_width([g])
-
-            if self.group_has_urgent(g) and self.urgent_alert_method == "text":
-                text_color = self.urgent_text
-            else:
-                text_color = self.colours[i]
-
-            if g.screen:
-                if self.highlight_method == "text":
-                    border = None
-                    text_color = self.this_current_screen_border
-                else:
-                    if self.block_highlight_text_color:
-                        text_color = self.block_highlight_text_color
-                    if self.bar.screen.group.name == g.name:
-                        if self.qtile.current_screen == self.bar.screen:
-                            border = self.colours[i]
-                            to_highlight = True
-                        else:
-                            border = self.this_screen_border
-                    else:
-                        if self.qtile.current_screen == g.screen:
-                            border = self.other_current_screen_border
-                        else:
-                            border = self.other_screen_border
-            elif self.group_has_urgent(g) and self.urgent_alert_method in (
-                "border",
-                "block",
-                "line",
-            ):
-                border = self.urgent_border
-                if self.urgent_alert_method == "block":
-                    is_block = True
-                elif self.urgent_alert_method == "line":
-                    is_line = True
-            else:
-                border = None
-
-            self.drawbox(
-                offset,
-                g.label,
-                border,
-                text_color,
-                highlight_color=self.highlight_color,
-                width=bw,
-                rounded=self.rounded,
-                block=is_block,
-                line=is_line,
-                highlighted=to_highlight,
-            )
-            offset += bw + self.spacing
-        self.drawer.draw(offsetx=self.offset, offsety=self.offsety, width=self.width)
         
 def box_decoration():
     return RectDecoration(radius=14, use_widget_background=True, filled=True, group=True)
@@ -240,19 +180,14 @@ screens = [
                 widget.Spacer(length=10),
                 separator(),
                 ColouredGroupBox(
-                    urgent_border=colours["red"], 
+                    urgent_underline_color=colours["red"], 
                     colours=[
                         colours["lavender"], colours["peach"], colours["blue"], 
                         colours["mauve"], colours["yellow"], colours["green"],
                         colours["sapphire"], colours["red"], colours["sky"]
                     ],
-                    highlight_method="line", 
-                    rounded=True, 
                     padding_x=5, 
                     margin_x=2, margin_y=4, 
-                    urgent_alert_method="line",
-                    this_current_screen_border=colours["text"],
-                    other_current_screen_border=colours["rosewater"],
                     disable_drag=True,
                     fontsize=30,
                     borderwidth=2,
@@ -293,7 +228,7 @@ screens = [
                     decorations = [box_decoration()],
                 ),
                 widget.Spacer(),
-                widget.WindowName(font="JetBrains Mono Nerd Font", width=480, scroll=True, scroll_interval=0.02, scroll_step=1),
+                widget.WindowName(font="JetBrains Mono Nerd Font", width=450, scroll=True, scroll_interval=0.02, scroll_step=1),
                 widget.Spacer(),
                 # widget.Bluetooth(
                 #     hci="/dev_04_52_C7_83_60_BD",
