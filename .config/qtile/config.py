@@ -47,7 +47,6 @@ keys = [
     Key([mod], "i", lazy.layout.grow()),
     Key([mod], "m", lazy.layout.shrink()),
     Key([mod], "n", lazy.layout.normalize()),
-    Key([mod, "shift"], "n", lazy.layout.reset()),
     Key([mod], "o", lazy.layout.maximize()),
     Key([mod, "shift"], "space", lazy.layout.flip()),
     Key([mod, "shift"], "Return", lazy.spawn(terminal), desc="Launch terminal"),
@@ -63,9 +62,9 @@ keys = [
     Key([mod, "shift"], "s", lazy.spawn("flameshot gui"), desc="Flameshot"),
     Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +10%"), desc="Increase the brightness"),
     Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 10%-"), desc="Decrease the brightness"),  
-    Key([mod, "shift"], "k", lazy.spawn("dunstctl history-pop"), desc="Pop the last notification"),
-    Key([mod, "shift"], "j", lazy.spawn("dunstctl close"), desc="Close the last notification"),
-    Key([mod, "shift"], "d", lazy.spawn("dunstctl close-all"), desc="Close all notifications"),
+    Key([mod, "shift"], "r", lazy.spawn("dunstctl history-pop"), desc="Pop the last notification"),
+    Key([mod, "shift"], "v", lazy.spawn("dunstctl close"), desc="Close the last notification"),
+    Key([mod, "shift"], "f", lazy.spawn("dunstctl close-all"), desc="Close all notifications"),
     Key([mod, "shift"], "t", lazy.hide_show_bar(), desc="Toggle the top bar"),
 ]
 
@@ -78,7 +77,7 @@ groups = [
         Group("󰍳"),
         Group("󰈙"),
         Group(""),
-        Group(""),
+        Group(""),
 ]
 
 for i in range(len(groups)):
@@ -135,8 +134,8 @@ colours = {
 }
 
 layouts = [
-    layout.MonadTall(margin=10, border_focus=colours["sapphire"], border_normal=colours["base"], border_width=3, new_client_position="top"),
-    layout.MonadWide(margin=10, border_focus=colours["sapphire"], border_normal=colours["base"], border_width=3),
+    layout.MonadTall(margin=10, border_focus=colours["mauve"], border_normal=colours["base"], border_width=3, new_client_position="top"),
+    layout.MonadWide(margin=10, border_focus=colours["mauve"], border_normal=colours["base"], border_width=3),
     layout.Max(margin=10),
     layout.Floating(border_focus=colours["yellow"], border_width=3),
 ]
